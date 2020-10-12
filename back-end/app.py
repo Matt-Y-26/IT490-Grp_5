@@ -34,6 +34,22 @@ conn = psycopg2.connect(
 print(' [*] Waiting for DB queries.')
 print(' [*] Waiting for messages.')
 
+curr = conn.cursor()
+channel = connection.channel()
+
+#WORKS!!
+username='ex'
+hashed='ex'
+curr.execute('INSERT INTO users VALUES (%s, %s);', ('exuser', 'exhash'))
+conn.commit()
+curr.execute('SELECT hashed FROM users WHERE username=%s;', ('exuser',))
+data = curr.fetchone()
+print (data)
+#curr.execute('INSERT INTO users VALUES ("exuser", "exhash"))
+#curr.execute('SELECT hash FROM users WHERE username="exuser")
+print(' sql statements executed ' )
+
+
 
 def process_request(ch, method, properties, body):
     """
