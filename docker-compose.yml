@@ -4,9 +4,9 @@ services:
         image: 'rabbitmq:3.8.8-management'
         ports:
             - 15672:15672
-    adminer: 
+    adminer:
         image: adminer
-        ports: 
+        ports:
             - 8080:8080
     db:
         build: db/
@@ -14,7 +14,6 @@ services:
             POSTGRES_PASSWORD: 'example'
         volumes:
             - data-volume:/var/lib/postgresql/data
-            - ./db/:/docker-entrypoint-initdb.d/
     front-end:
         build: front-end/
         ports:
