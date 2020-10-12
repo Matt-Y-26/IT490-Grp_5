@@ -4,9 +4,8 @@
 
 DROP TABLE IF EXISTS "users";
 CREATE TABLE "public"."users" (
-    "username" character(64) NOT NULL,
-    "hash" character(1) NOT NULL
+    "username" character(256) NOT NULL,
+    "hashed" character(256) NOT NULL
 ) WITH (oids = false);
 
 
--- 2020-10-06 01:00:45.672546+00
