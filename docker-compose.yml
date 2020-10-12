@@ -1,14 +1,25 @@
-messaging:
-    image: 'rabbitmq:3.8.8-management'
-    ports:
-        - 15672:15672
-db:
-    image: 'postgres'
-    environment:
-        POSTGRES_PASSWORD: 'example'
-front-end:
-    build: front-end/
-    ports:
-        - 5000:5000
-back-end:
-    build: back-end/
+version: "3.8"
+services:
+    messaging:
+        image: 'rabbitmq:3.8.8-management'
+        ports:
+            - 15672:15672
+    adminer: 
+        image: adminer
+        ports: 
+            - 8080:8080
+    db:
+        build: db/
+        environment:
+            POSTGRES_PASSWORD: 'example'
+        volumes:
+            - data-volume:/var/lib/postgresql/data
+            - ./db/:/docker-entrypoint-initdb.d/
+    front-end:
+        build: front-end/
+        ports:
+            - 5000:5000
+    back-end:
+        build: back-end/
+volumes:
+    data-volume:
