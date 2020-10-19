@@ -2,6 +2,9 @@ import pika
 import time
 import os
 import psycopg2
+import logging
+import json
+
 
 # Sleep time for BE to connect
 
@@ -34,22 +37,43 @@ conn = psycopg2.connect(
 print(' [*] Waiting for DB queries.')
 print(' [*] Waiting for messages.')
 
+
+
+
+
+
 curr = conn.cursor()
 channel = connection.channel()
 
 #WORKS!!
 username='ex'
 hashed='ex'
-curr.execute('INSERT INTO users VALUES (%s, %s);', ('exuser', 'exhash'))
-conn.commit()
-curr.execute('SELECT hashed FROM users WHERE username=%s;', ('exuser',))
-data = curr.fetchone()
-print (data)
+# THIS WAS FOR MILESTONE 3 EXAMPLE SHOWING IT CAN COMMUNICATE
+#curr.execute('INSERT INTO users VALUES (%s, %s);', ('exuser', 'exhash'))
+#conn.commit()
+#curr.execute('SELECT hashed FROM users WHERE username=%s;', ('exuser',))
+#data = curr.fetchone()
+#print (data)
 #curr.execute('INSERT INTO users VALUES ("exuser", "exhash"))
 #curr.execute('SELECT hash FROM users WHERE username="exuser")
-print(' sql statements executed ' )
+#print(' sql statements executed ' )
 
 
+
+#get it
+#def get_h(data):
+#    username = data['username']
+#    logging.info(f"GETHASH request for {username} received")
+#    cursor.execute('SELECT hashed FROM usersinfo WHERE username=%s;', (username,))
+#    datab = cursor.fetchone()
+#    if datab is None:
+#        response = {'success': False}
+#    else:
+#        response = {'success': True, 'hashed': row[0]}
+#    return response
+    
+    
+    
 
 def process_request(ch, method, properties, body):
     """
@@ -66,9 +90,9 @@ def process_request(ch, method, properties, body):
         action = request['action']
         if action == 'GETHASH':
             data = request['data']
-            email = data['email']
-            logging.info(f"GETHASH request for {email} received")
-            curr.execute('SELECT hash FROM users WHERE email=%s;', (email,))
+            username = data['username']
+            logging.info(f"GETHASH request for {username} received")
+            curr.execute('SELECT hashed FROM users WHERE username=%s;', (username,))
             row =  curr.fetchone()
             if row == None:
                 response = {'success': False}
@@ -76,14 +100,14 @@ def process_request(ch, method, properties, body):
                 response = {'success': True, 'hash': row[0]}
         elif action == 'REGISTER':
             data = request['data']
-            email = data['email']
-            hashed = data['hash']
-            logging.info(f"REGISTER request for {email} received")
-            curr.execute('SELECT * FROM users WHERE email=%s;', (email,))
+            username = data['username']
+            hashed = data['hashed']
+            logging.info(f"REGISTER request for {username} received")
+            curr.execute('SELECT * FROM users WHERE username=%s;', (username,))
             if curr.fetchone() != None:
                 response = {'success': False, 'message': 'User already exists'}
             else:
-                curr.execute('INSERT INTO users VALUES (%s, %s);', (email, hashed))
+                curr.execute('INSERT INTO users VALUES (%s, %s);', (username, hashed))
                 conn.commit()
                 response = {'success': True}
         else:
@@ -94,3 +118,12 @@ def process_request(ch, method, properties, body):
         routing_key=properties.reply_to,
         body=json.dumps(response)
     )
+    
+channel.queue_declare(queue='request')
+
+channel.basic_consume(queue='request', auto_ack=True,
+                      on_message_callback=process_request)
+
+# loops forever consuming from 'request' queue
+logging.info("Starting consumption...")
+channel.start_consuming()

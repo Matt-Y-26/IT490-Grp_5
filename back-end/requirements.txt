@@ -1,2 +1,4 @@
 pika
 psycopg2
+requests
+Flask-SQLAlchemy==2.4.0
