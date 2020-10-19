@@ -4,6 +4,9 @@ services:
         image: 'rabbitmq:3.8.8-management'
         ports:
             - 15672:15672
+        environment:
+            RABBITMQ_DEFAULT_USER: 'guest'
+            RABBITMQ_DEFAULT_PASS: 'guest'
     adminer:
         image: adminer
         ports:
@@ -16,9 +19,18 @@ services:
             - data-volume:/var/lib/postgresql/data
     front-end:
         build: front-end/
+        environment:
+            RABBITMQ_DEFAULT_USER: 'guest'
+            RABBITMQ_DEFAULT_PASS: 'guest'
+            FLASK_ENV: development
+            FLASK_SECRET_KEY: 'secret'
         ports:
             - 5000:5000
     back-end:
         build: back-end/
+        environment:
+            RABBITMQ_DEFAULT_USER: 'guest'
+            RABBITMQ_DEFAULT_PASS: 'guest'
+            PYTHONUNBUFFERED: 1
 volumes:
     data-volume:
