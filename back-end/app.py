@@ -7,12 +7,10 @@ import json
 
 
 # Sleep time for BE to connect
-
+time.sleep(20)
+print("Back end is running now")
 
 # Connect with Messaging
-time.sleep(20)
-
-print("Back end is running now")
 credentials = pika.PlainCredentials('guest','guest')
 connection = pika.BlockingConnection(
 	pika.ConnectionParameters(
@@ -45,7 +43,7 @@ print(' [*] Waiting for messages.')
 curr = conn.cursor()
 channel = connection.channel()
 
-#WORKS!!
+#WORKS!! <- You sound surprised!!!
 username='ex'
 hashed='ex'
 # THIS WAS FOR MILESTONE 3 EXAMPLE SHOWING IT CAN COMMUNICATE
