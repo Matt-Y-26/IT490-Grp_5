@@ -15,7 +15,22 @@ services:
         build: db/
         environment:
             POSTGRES_PASSWORD: 'example'
-            POSTGRES_DB: 'users'
+            POSTGRES_REPLICA_PASSWORD: 'example'
+            POSTGRES_NODES: 'db db2'
+            #PGDATA: /var/lib/postgresql/data/pgdata
+            #PGDATA: /tmp
+          
+        volumes:
+            - data-volume:/var/lib/postgresql/data
+    db2:
+        build: db/
+        environment:
+            POSTGRES_PASSWORD: 'example'
+            POSTGRES_REPLICA_PASSWORD: 'example'
+            POSTGRES_NODES: 'db db2'
+            #PGDATA: /var/lib/postgresql/data/pgdata
+            #PGDATA: /tmp
+            
         volumes:
             - data-volume:/var/lib/postgresql/data
     front-end:
