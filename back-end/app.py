@@ -7,10 +7,12 @@ import json
 
 
 # Sleep time for BE to connect
-time.sleep(20)
-print("Back end is running now")
+
 
 # Connect with Messaging
+time.sleep(20)
+
+print("Back end is running now")
 credentials = pika.PlainCredentials('guest','guest')
 connection = pika.BlockingConnection(
 	pika.ConnectionParameters(
@@ -26,7 +28,7 @@ print(' [*] Connecting to the database...')
 postgres_user = 'postgres'
 postgres_password = 'example'
 conn = psycopg2.connect(
-    host='db',
+    host='db, db2',
     database='users',
     user=postgres_user,
     password=postgres_password
@@ -43,7 +45,7 @@ print(' [*] Waiting for messages.')
 curr = conn.cursor()
 channel = connection.channel()
 
-#WORKS!! <- You sound surprised!!!
+#WORKS!!
 username='ex'
 hashed='ex'
 # THIS WAS FOR MILESTONE 3 EXAMPLE SHOWING IT CAN COMMUNICATE
@@ -95,7 +97,7 @@ def process_request(ch, method, properties, body):
             if row == None:
                 response = {'success': False}
             else:
-                response = {'success': True, 'hash': row[0]}
+                response = {'success': True, 'hashed': row[0]}
         elif action == 'REGISTER':
             data = request['data']
             username = data['username']
