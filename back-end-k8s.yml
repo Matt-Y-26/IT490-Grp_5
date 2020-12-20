@@ -25,4 +25,4 @@ spec:
             - name: RABBITMQ_DEFAULT_PASS
               value: "guest"
             - name: POSTGRES_PASSWORD
-              value: "changeme"
+              value: "example"
