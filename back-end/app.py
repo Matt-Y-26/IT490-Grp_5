@@ -25,24 +25,44 @@ connection = pika.BlockingConnection(
 print(' [*] Connecting to the database...')
 #postgres_user = os.environ['DB_USER']
 #postgres_password = os.environ['DB_PASS']
-postgres_user = 'postgres'
-postgres_password = 'example'
-conn = psycopg2.connect(
-    host='db, db2',
-    database='users',
-    user=postgres_user,
-    password=postgres_password
-)
 
+#postgres_user = 'postgres'
+#postgres_password = 'example'
+#conn = psycopg2.connect(
+#   host='db, db2',
+#    database='users',
+#    user=postgres_user,
+#    password=postgres_password
+#)
+
+#Updated connect with the db
+logging.info("Connecting to read only db")
+postgres_password = os.environ['POSTGRES_PASSWORD']
+conn_r = psycopg2.connect(
+    host='db-r',
+    database='example',
+    user='postgres',
+    password='changeme'
+    )
+    
+logging.info("Connecting to read-write db")
+postgres_password = os.environ['POSTGRES_PASSWORD']
+conn_rw = psycopg2.connect(
+    host='db-rw',
+    database='example',
+    user='postgres',
+    password='changeme'
+    )
+    
 print(' [*] Waiting for DB queries.')
 print(' [*] Waiting for messages.')
 
 
 
 
-
-
-curr = conn.cursor()
+curr_r = conn_r.cursor()
+curr_rw = conn_rw.cursor()
+#curr = conn.cursor()
 channel = connection.channel()
 
 #WORKS!!
@@ -92,8 +112,8 @@ def process_request(ch, method, properties, body):
             data = request['data']
             username = data['username']
             logging.info(f"GETHASH request for {username} received")
-            curr.execute('SELECT hashed FROM users WHERE username=%s;', (username,))
-            row =  curr.fetchone()
+            curr_r.execute('SELECT hashed FROM users WHERE username=%s;', (username,))
+            row =  curr_r.fetchone()
             if row == None:
                 response = {'success': False}
             else:
@@ -103,12 +123,12 @@ def process_request(ch, method, properties, body):
             username = data['username']
             hashed = data['hashed']
             logging.info(f"REGISTER request for {username} received")
-            curr.execute('SELECT * FROM users WHERE username=%s;', (username,))
-            if curr.fetchone() != None:
+            curr_r.execute('SELECT * FROM users WHERE username=%s;', (username,))
+            if curr_r.fetchone() != None:
                 response = {'success': False, 'message': 'User already exists'}
             else:
-                curr.execute('INSERT INTO users VALUES (%s, %s);', (username, hashed))
-                conn.commit()
+                curr_rw.execute('INSERT INTO users VALUES (%s, %s);', (username, hashed))
+                curr_rw.commit()
                 response = {'success': True}
         else:
             response = {'success': False, 'message': "Unknown action"}
